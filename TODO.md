@@ -43,3 +43,4 @@
 | T-009 | Gather all source files in a global variable | TBD | @fritzone | Assigned | 2026-06-02 | N/A |
 | T-010 | Add `${CMAKE_CURRENT_SOURCE_DIR}/` to file names  | TBD | @fritzone | Assigned | 2026-06-02 | N/A |
 | T-011 | Just use `$project` | TBD | @fritzone | Assigned | 2026-06-02 | N/A |
+| T-012 | include directory generation based on parsing the file for #include | TBD | @fritzone | Assigned | 2026-06-02 | N/A |

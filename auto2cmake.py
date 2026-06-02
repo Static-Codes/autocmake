@@ -2,12 +2,14 @@
 ########################################################################################################################
 #                                               Application Description                                                #
 ########################################################################################################################
-# script to convert an autotools project to more or less corresponding CMakeLists.txt structure
-# Interpret the linker flags
-# interpret the programs, generate add_executable
-# specify the target link dependencies
-# the gather the files mode
-# include directory generation based on parsing the file for #include
+# A script to convert an autotools project to more or less corresponding CMakeLists.txt structure
+# 
+# How it works:
+#
+# 1. Interprets the linker flags.
+# 2. Interprets the linked binaries, and outputs a CMake 'add_executable' command. 
+# 3. Locates the target link dependencies.
+# 4. Iterates through all directories that contain an autotools project file.
 
 
 ########################################################################################################################
