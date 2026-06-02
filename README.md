@@ -1,6 +1,6 @@
 # Auto2CMake
 
-Auto2CMake is a pure python utility designed to simplify the process of migrating a project from Autotools/QMake to CMake 2.7 and above! 
+Auto2CMake is a pure python utility designed to simplify the process of migrating a project from Autotools or QMake to CMake 2.7 and above! 
 
 By automating the extraction and translation of build configurations, it reduces the manual effort required to modernize project build infrastructures.
 
