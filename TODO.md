@@ -1,5 +1,5 @@
 # Project TODO List
-## Last updated 2026-06-02T18:05:54.000-04:00
+## Last updated 2026-06-02T19:02:48.000-04:00
 
 ### Priority
 - High
@@ -30,15 +30,17 @@
         - Click "Generate ISO 8601 Data" 
         - Copy the generated timestamp under "ISO 8601 Date"
 
+### Tasks
+
 | Task ID | Task Description | Priority | Status | Assigned To | Date Assigned | Date Completed
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | T-001 | Fix the dual recursion bug in `convert_sourcetree_to_cmake` | High | Completed | @Static-Codes | 2026-03-31 | 2026-04-01 |
 | T-002 | Improve the variable expansion logic for `_SOURCES` | Low | Unassigned | TBD | N/A | N/A |
 | T-003 | Add support for QMake's `subdirs` project type | Low | Unassigned | TBD | N/A | N/A |
 | T-004 | Refine the configuration file parsing logic | Low | Unassigned | TBD | N/A | N/A |
-| T-005 | Update minimum version pinning of CMake (3.X) | Low | @fritzone | Assigned | 2026-04-10 | N/A |
+| T-005 | Update minimum version pinning of CMake (3.X) | Low | @fritzone | Approved | 2026-04-10 | 2026-04-10 |
 | T-006 | Address the `# FIX THIS` comments | Low | Unassigned | TBD | N/A | N/A |
-| T-007 | Implement `get_cmake_version()` | Low | @Static-Codes | Pending Review | 2026-04-08 | 2026-04-09 |
+| T-007 | Implement `get_cmake_version()` | Low | @Static-Codes | Approved | 2026-04-08 | 2026-04-09 |
 | T-008 | Rename `remove_garbage()` to `sanitize_string()` | TBD | @fritzone | Assigned | 2026-06-02 | N/A |
 | T-009 | Gather all source files in a global variable | TBD | @fritzone | Assigned | 2026-06-02 | N/A |
 | T-010 | Add `${CMAKE_CURRENT_SOURCE_DIR}/` to file names  | TBD | @fritzone | Assigned | 2026-06-02 | N/A |
