@@ -50,10 +50,8 @@ from typing import List, Optional # Used for explicit type declarations. (helpfu
 ########################################################################################################################
 
 
-########################################################################################################################
-# Represents a CMake file that will be generated at a later stage.
-########################################################################################################################
 class CMakeFile:
+    """Represents a CMake file that will be generated at a later stage."""
     def __init__(self, directory):
         self.directory = directory                  # The directory where this can be found
         self.contained_libraries_content = []       # All the content of the libraries that are created in here
@@ -61,15 +59,13 @@ class CMakeFile:
         self.extra_content = ""                     # Extra stuff such as add_subdriectory
 
 
-########################################################################################################################
-# Represents a CMake version object that will be utilized prior to, and during the generation stages.
-########################################################################################################################
 class CMakeVersion:
+    """Represents a CMake version object that will be utilized prior to, and during the generation stages."""
     def __init__(self, version_string: str):
         self.full_version: str = version_string
         
-        self.major: int = None
-        self.minor: int = None
+        self.major: Optional[int] = None
+        self.minor: Optional[int] = None
         
         # Since the build version is not always specified, defaulting it to 0 will avoid AttributeError(s)
         self.build: int = 0 
@@ -105,17 +101,15 @@ class CMakeVersion:
     def __str__(self):
         return self.full_version
 
-########################################################################################################################
-# Whether a target is a Library (noinst_LIBRARIES) or an Application (bin_PROGRAMS)
-########################################################################################################################
+
 class TargetType(Enum):
+    """Whether a target is a Library (noinst_LIBRARIES) or an Application (bin_PROGRAMS)"""
     LIBRARY = 1
     PROGRAM = 2
 
-########################################################################################################################
-# Represents a library that will be built by a specific make command.
-########################################################################################################################
+
 class Library:
+    """Represents a library that will be built by a specific make command."""
     def __init__(self, name, directory):
         self.name = name
         self.dependant = False
@@ -154,10 +148,8 @@ class Library:
             self.referred_name = self.name
 
 
-########################################################################################################################
-# Represents an option that will go in the CMakeLists.txt and also in the generated header if a define is present.
-########################################################################################################################
 class Option:
+    """Represents an option that will go in the CMakeLists.txt and also in the generated header if a define is present."""
 
     def __init__(self, name, description, status, define, define_value, define_description):
         name = name.replace("-", "_")
@@ -276,7 +268,7 @@ working_directory = "."
 # "-e <dir>"
 # "--exclude=<dir>"
 # "--exclude=<dir1>:<dir2>:<dir3>"
-exclude_directories = []
+excluded_directories = []
 
 
 #######################################################################################################################
@@ -331,11 +323,9 @@ qrc_extensions = [".qrc"]
 #                                       Helper functions used by the application                                       #
 ########################################################################################################################
 
-########################################################################################################################
-# Checks for an installation of CMake and attempts to resolve the version installed.
-########################################################################################################################
 def get_installed_cmake_version() -> Optional[CMakeVersion]:
-    print(f"Checking for a CMake installation, please wait.")
+    """Checks for an installation of CMake and attempts to resolve the version installed."""
+    print("Checking for a CMake installation, please wait.")
     print()
         
     # Checking for the existence of "cmake" in the current system's path.
@@ -376,12 +366,13 @@ def get_installed_cmake_version() -> Optional[CMakeVersion]:
     return CMakeVersion(match.group(1))
     
 
-########################################################################################################################
-# Performs a comparison operation on two CMakeVersion objects.
-# Returns True if lower_version_obj is greater than higher_version_obj when both objects are parsed.
-# Returns False otherwise.
-########################################################################################################################
 def cmake_version_is_invalid(lower_version_obj: CMakeVersion, higher_version_obj: CMakeVersion) -> bool:
+    """
+        Performs a comparison operation on two CMakeVersion objects.
+        Returns True if lower_version_obj is greater than higher_version_obj when both objects are parsed.
+        Returns False otherwise.
+    """
+
     # Handling the major and minor versions of both CMakeVersion objects passed as parameters.
     if (
         lower_version_obj.major is None or
@@ -410,12 +401,8 @@ def cmake_version_is_invalid(lower_version_obj: CMakeVersion, higher_version_obj
     return False
 
 
-########################################################################################################################
-# Validates the value for the arguments "-v <VERSION>" and --version="<VERSION>"
-########################################################################################################################
 def validate_cmake_version(provided_version: str, latest_version: Optional[str]):
-    global cmake_installed_version
-    global cmake_minimum_version
+    """Validates the value for the arguments "-v <VERSION>" and --version="<VERSION>"""
 
     if latest_version is None:
         print("Unable to resolve the latest version of CMake.")
@@ -462,10 +449,9 @@ def validate_cmake_version(provided_version: str, latest_version: Optional[str])
         print("Skipping version validation.")
         return
 
-########################################################################################################################
-# Resolves the latest version of CMake from https://github.com/Kitware/CMake
-########################################################################################################################
+
 def get_latest_cmake_version():
+    """Resolves the latest version of CMake from https://github.com/Kitware/CMake"""
     url = "https://api.github.com/repos/Kitware/CMake/releases"
     version = None
     json_data = None
@@ -484,10 +470,9 @@ def get_latest_cmake_version():
     
     return CMakeVersion(version)
 
-########################################################################################################################
-# Updates the CMake version information used by the application.
-########################################################################################################################
+
 def update_version_info():
+    """Updates the CMake version information used by the application."""
     global cmake_maximum_version
     global cmake_installed_version
 
@@ -497,24 +482,22 @@ def update_version_info():
     # The currently installed version of CMake on the System. Exits if CMake is not detected.
     cmake_installed_version = get_installed_cmake_version()
 
-# prints a warning message
-########################################################################################################################
+
 def warning(*s):
+    """Prints a warning message"""
     print("".join(s))
 
-########################################################################################################################
-# Checks if there is already a library called
-########################################################################################################################
+
 def has_library(name):
-    for l in libraries:
-        if l.canonic_name == name:
+    """Checks if there is already a library with the specified name"""
+    for library in libraries:
+        if library.canonic_name == name:
             return True
     return False
 
-########################################################################################################################
-# counts the parentheses in the line. Returns 0 if the number of opened parenthesis equals the number of closed ones
-########################################################################################################################
+
 def count_parentheses(line):
+    """Counts the parentheses in the line. Returns 0 if the number of opened parenthesis equals the number of closed ones"""
     parco = 0
     for char in line:
         if char == '(':
@@ -524,33 +507,32 @@ def count_parentheses(line):
     return parco
 
 
-########################################################################################################################
-# Replaces the quotes with escaped quotes to be put in the CMakeLists.txt
-########################################################################################################################
 def replace_quotes(value):
+    """Replaces the quotes with escaped quotes to be put in the CMakeLists.txt"""
     value = value.replace('\"', '\\"')
     return value
 
 
 def get_library_for_name(name):
+    """Returns a library object if the library's name matches the specified name string."""
     for library in libraries:
         if library.canonic_name == name:
             return library
     return None
 
-########################################################################################################################
-# returns the similarity of two strings.
-########################################################################################################################
-def similar(a, b):
-    return SequenceMatcher(None, a, b).ratio()
+
+def similar(s1, s2):
+    """Returns the similarity of two strings."""
+    return SequenceMatcher(None, s1, s2).ratio()
 
 
 ########################################################################################################################
-# Whether the directory is excluded or not
+# 
 ########################################################################################################################
-def should_exclude(dire):
-    for exc_dir in exclude_directories:
-        if dire.startswith(exc_dir):
+def should_exclude(directory_path):
+    """Whether the directory is excluded or not."""
+    for excluded_directory in excluded_directories:
+        if directory_path.startswith(excluded_directory):
             return True
     return False
 
@@ -559,14 +541,12 @@ def should_exclude(dire):
 # removes the garbage characters from the given string
 ########################################################################################################################
 def remove_garbage(extra_value):
-    extra_value = extra_value.replace(']', '')
-    extra_value = extra_value.replace(',', '')
-    extra_value = extra_value.replace('[', '')
-    extra_value = extra_value.replace('$', '')
-    extra_value = extra_value.replace('(', '')
-    extra_value = extra_value.replace(')', '')
-    extra_value = extra_value.strip()
-    return extra_value
+    chars = ",[]$()"
+    
+    for char in chars:
+        extra_value = extra_value.replace(char, '')
+
+    return extra_value.strip()
 
 
 ########################################################################################################################
@@ -733,22 +713,21 @@ def process_a_define(line):
     temp_defines[define_string]["used"] = 0
 
 
-########################################################################################################################
-# processes a Makefile.am
-########################################################################################################################
 def process_makefile_am(file):
+    """Processes the contents of a Makefile.am"""
 
-    # the content of the outgoing CMakeLists.txt
+    # Checking the content of the outgoing CMakeLists.txt
     if not os.path.isfile(file):
         warning("File not found:", file)
         return
+
     current_directory = os.path.dirname(file)
 
 
     if should_exclude(current_directory):
         return
 
-    # Will recurse into these dires
+    # Will recursively into these directories
     dirs_to_go_in = []
 
     defined_variables = {}
@@ -759,6 +738,7 @@ def process_makefile_am(file):
     # First run: parse out all the libraries
     for line in content:
         line = line.strip()
+        
         # is this a valid line? ie. no comments?
         if line.startswith("#"):
             continue
@@ -769,16 +749,21 @@ def process_makefile_am(file):
             library_names = elements[2:]
             makefiles_directory = current_directory
             process_it = True
-            for excluded_dir in exclude_directories:
-                if makefiles_directory.startswith(excluded_dir) and excluded_dir:
+            
+            for excluded_directory in excluded_directories:
+                if makefiles_directory.startswith(excluded_directory) and excluded_directory:
                     process_it = False
+
             if process_it:
+                
                 for library_name in library_names:
                     library = Library(library_name, makefiles_directory)
+                    
                     # program or library?
                     if line.find("_PROGRAMS") != -1:
                         library.target_type = TargetType.PROGRAM
                         library.referred_name = library.canonic_name
+                    
                     if not has_library(library.canonic_name):
                         libraries.append(library)
 
@@ -790,16 +775,18 @@ def process_makefile_am(file):
         # is this a valid line? ie. no comments?
         if line.startswith("#"):
             continue
+
         if line.startswith("if"):
             elements = line.split()
             if_condition = elements[1]
+        
         if line.startswith("endif"):
             if_condition = ""
 
-        # see if this is an assignment or not
+        # Checking if the line contains an assignment.
         if '=' in line or "+=" in line:
-            # simple assignment
-            # read in the line as long as we don't have ending \\
+            # Handling simple assignments.
+            # The line is read until '\\' is found.
             while line.endswith('\\'):
                 i += 1
                 line += content[i].strip()
@@ -814,18 +801,20 @@ def process_makefile_am(file):
             if '+' in variable:
                 variable = variable.replace('+', '').strip()
 
-            # see if this is a SOURCE identifier for a specific library
+            # Checking if the variable in question is a SOURCE identifier for a specific library.
             if variable.endswith("_SOURCES"):
-                # find the lib name
+
+                # Locating the target library name.
                 target_lib_name = variable[:-len("_SOURCES")]
 
-                # now find the library from the libraries list, built in the previous step
+                # Returning the Library object associated with the target library name.
                 library = get_library_for_name(target_lib_name)
 
                 if library:
                     used = True
                     libraries_in_this_file.append(target_lib_name)
-                    # do we have a condition for this library?
+
+                    # Checking if the library has a condition present.
                     if if_condition:
                         library.condition += if_condition
 
@@ -835,14 +824,17 @@ def process_makefile_am(file):
                         library.filelist = elements[1].split()
 
             if variable.endswith("_LDADD"):
-                # find the lib name
+                # Locating the target library name.
                 target_lib_name = variable[:-len("_LDADD")]
+
+                # Returning the Library object associated with the target library name.
                 library = get_library_for_name(target_lib_name)
 
                 if library in libraries:
                     used = True
                     libraries_in_this_file.append(target_lib_name)
-                    # do we have a condition for this library?
+                    
+                    # Checking if the library has a condition present.
                     if if_condition:
                         library.condition += if_condition
 
@@ -852,49 +844,64 @@ def process_makefile_am(file):
                         library.link_with_libs = elements[1].split()
 
             if variable.endswith("_CXXFLAGS") or variable.endswith("_CPPFLAGS") or variable.endswith("_CFLAGS"):
-                # find the lib name
+                
+                # Locating the target library name.
                 if variable.endswith("_CFLAGS"):
                     target_lib_name = variable[:-len("_CFLAGS")]
+                
                 else:
                     target_lib_name = variable[:-len("_CXXFLAGS")]
 
+                # Returning the Library object associated with the target library name.
                 library = get_library_for_name(target_lib_name)
 
                 if library in libraries:
                     used = True
                     libraries_in_this_file.append(target_lib_name)
-                    # do we have a condition for this library?
+
+                    # Checking if the library has a condition present.
                     if if_condition:
                         library.condition += if_condition
+                    
                     defines = line.replace(variable, "", 1)
                     defines = defines.replace("=", "", 1)
                     defines = defines.strip()
+                    
                     if "+=" in line:
                         library.compiler_flags += defines
+                    
                     else:
                         library.compiler_flags = defines
 
             if variable.endswith("_LDFLAGS"):
-                # find the lib name
+
+                # Locating the target library name.
                 target_lib_name = variable[:-len("_LDFLAGS")]
+
+                # Checking if the library has a condition present.
                 library = get_library_for_name(target_lib_name)
 
                 if library in libraries:
                     used = True
                     libraries_in_this_file.append(target_lib_name)
-                    # do we have a condition for this library?
+
+                    # Checking if the library has a condition present.
                     if if_condition:
                         library.condition += if_condition
+                    
                     if "+=" in line:
                         library.linker_flags += elements[1].split()
+                    
                     else:
                         library.linker_flags = elements[1].split()
 
             if not used:
                 if variable == "SUBDIRS":
                     dirs_to_go_in = elements[1]
-                # This is possibly just a "simple" variable. Highly possible just gathers
-                # stuff and uses it at a later stage with $(varname)
+                
+                # This is possibly just a "simple" variable. 
+                # It is captured and used at a later stage with `$(varname)`
+                
                 if variable.find("_LIBRARIES")  == -1 and variable.find("_PROGRAMS") == -1:
                     if not variable in defined_variables:
                         defined_variables[variable] = {}
@@ -1028,6 +1035,7 @@ def process_libraries():
         # Now match the option's define to the if_condition above
         if library.condition:
             condition_used = False
+
             for option in options:
                 if options[option].get_define() == library.condition:
                     # add an "if (option)" to the CMakeLists.txt
@@ -1038,10 +1046,12 @@ def process_libraries():
                     current_content += "    list(APPEND ${project}_SOURCES\n    " + filelist + ")\nendif()\n\n"
                     added_files.append(filelist)
                     condition_used = True
+
             if not condition_used:
                 new_condition = ""
                 for c in library.condition:
                     new_condition += c
+                
                 library.condition = new_condition
                 current_content += "if (" + new_condition + ")\n"
                 condition_required = new_condition
@@ -1203,31 +1213,34 @@ def process_libraries():
         cmake_file_holder.libraries.append(library)
 
 
-########################################################################################################################
-# Makes a CMake internal library name from what comes in
-########################################################################################################################
 def make_nice_library_name(link_name):
+    """Makes a CMake internal library name from what comes in."""
     link_name = link_name.replace("'", "")
     if link_name.startswith("-L"):
         return link_name
+    
     fullp = link_name.split('/')
+    
     if len(fullp) > 1:
         target_link_lib = fullp[-1]
+
     else:
         target_link_lib = "".join(fullp)
+    
     if '.' in target_link_lib:
         target_link_lib = target_link_lib.split(".")[0]
+        
         if target_link_lib.startswith("lib"):
             target_link_lib = target_link_lib[3:]
+    
     if target_link_lib.startswith("-l"):
         target_link_lib = target_link_lib[2:]
+    
     return target_link_lib
 
 
-########################################################################################################################
-# Transform a list (of files) to a string
-########################################################################################################################
 def filelist_to_string(elements, source_directory, spacecount = 4):
+    """Transform a list (of files) to a string."""
     filelist = ""
     for file in sorted(elements):
         if os.path.isfile(source_directory + "/" + file):
@@ -1237,9 +1250,7 @@ def filelist_to_string(elements, source_directory, spacecount = 4):
             warning("WARNING!!! The file: " + source_directory + "/" + file + " is present in the Makefile.am but cannot be found in the filesystem")
     return filelist
 
-########################################################################################################################
-# processes the AC_CONFIG_FILES directive
-########################################################################################################################
+
 def process_config_files(line):
     s = line[len("AC_CONFIG_FILES("):].strip()
     s = remove_garbage(s)
@@ -1250,10 +1261,8 @@ def process_config_files(line):
             process_makefile_am(makefile_am)
 
 
-########################################################################################################################
-# processes the configure.ac and creates some options for the outgoing CmakeLists.txt
-########################################################################################################################
 def process_configure_ac(fname):
+    """Processes the configure.ac and creates some options for the outgoing CmakeLists.txt"""
     with open(fname) as f:
         content = f.readlines()
 
@@ -1370,10 +1379,9 @@ def process_configure_ac(fname):
                     option.add_extra_define(temp_define_name)
                     temp_define["used"] = 1
 
-########################################################################################################################
-# Generates default CMakeLists.txt in the given directory with content of source files
-########################################################################################################################
+
 def generate_default_cmake(req_dir):
+    """Generates default CMakeLists.txt in the given directory with content of source files"""
     projname = req_dir.split("/")[-1]
     sources = "set (project " + projname + ")\n"
     sources += "set(${project}_SOURCES\n"
@@ -1396,10 +1404,9 @@ def generate_default_cmake(req_dir):
         r_cmake_file.write("add_library(${project} STATIC ${${project}_SOURCES} )")
     r_cmake_file.close()
 
-########################################################################################################################
-# Adds extra content to the correct cmake file
-########################################################################################################################
+
 def process_cmake_file_directories():
+    """Adds extra content to the correct cmake file"""
     for dirname in extra_content:
         extra_c = extra_content[dirname]
         if not dirname in cmake_files:
@@ -1407,10 +1414,9 @@ def process_cmake_file_directories():
         c_cmake_file = cmake_files[dirname]
         c_cmake_file.extra_content = extra_c
 
-########################################################################################################################
-# Will check if the incoming header file is a MOC header or not. Just scan for a Q_OBJECT macro in it
-########################################################################################################################
+
 def moc_header(fn):
+    """Will check if the incoming header file is a MOC header or not. Just scan for a Q_OBJECT macro in it"""
     with open(fn) as search:
         for line in search:
             line = line.strip()  # remove '\n' at end of line
@@ -1422,16 +1428,19 @@ def moc_header(fn):
     print('  Checking if {} is moc:{}'.format(fn, False))
     return False
 
-########################################################################################################################
-# Creates a CMakeLists project file from the given parameters
-########################################################################################################################
+
 def create_cmakefile(path, cpps, headers, module):
+    """
+    Creates a CMakeLists project file from the given parameters.
+    
+    This will return: (bool, bool, bool)
+    
+    Meaning: first bool: there were cpp files
+             second bool: there were header files
+             third bool: if set to process qt style moc headers and there were moc headers: true
 
-    # This will return: (bool, bool, bool)
-    # Meaning: first bool: there were cpp files
-    #          second bool: there were header files
-    #          third bool: if set to process qt style moc headers and there were moc headers: true
-
+    """
+    
     cpps_found = False
     headers_found = False
     mocs_found = False
@@ -1481,10 +1490,9 @@ def create_cmakefile(path, cpps, headers, module):
 
     return cpps_found, headers_found, mocs_found, full_module
 
-########################################################################################################################
-# Converts a given directory to a CMake project
-########################################################################################################################
+
 def convert_sourcetree_to_cmake(start_path):
+    """Converts a given directory to a CMake project."""
 
     print("Converting: {}".format(start_path))
 
@@ -1494,7 +1502,7 @@ def convert_sourcetree_to_cmake(start_path):
 
     modules = []
     
-    # Grabbing the files and subdirectories in the immediate viscinity instead of using walking recursively.abs
+    # Grabbing the files and subdirectories in the immediate viscinity instead of using walking recursively.
     try:
         source_tree_entries = os.listdir(start_path)
     except OSError:
@@ -1597,18 +1605,14 @@ def convert_sourcetree_to_cmake(start_path):
     f.close()
     return used_module
 
-########################################################################################################################
-# Finds a list of files in the given directory
-########################################################################################################################
+
 def find_wildcard_file(fn, dir):
+    """Finds a list of files in the given directory"""
     fs = glob.glob(dir + "/" + fn)
     return fs
 
-########################################################################################################################
-# converts the qmake solution in the given directory
-########################################################################################################################
 def convert_qmake_project(dir, fn):
-
+    """Converts the qmake solution in the given directory."""
     global cmake_automoc
 
     print("\nQMake project started in {} for {}".format(dir, fn))
@@ -1824,10 +1828,8 @@ def convert_qmake_project(dir, fn):
     exit(0)
 
 
-########################################################################################################################
-# converts the solution in the current directory
-########################################################################################################################
 def convert():
+    """Converts the solution in the current directory."""
 
     global working_directory
     global cmake_minimum_version
@@ -1991,10 +1993,9 @@ def convert():
             warning("Default CMakeLists.txt in:", req_dir)
             generate_default_cmake(req_dir)
 
-########################################################################################################################
-# Prints how to use the application
-########################################################################################################################
+
 def usage():
+    """Prints how to use the application."""
     print("auto2cmake - A pure python utility to convert Autotools & QMake projects to CMake\n")
     
     print("Usage: auto2cmake.py [OPTIONS] \n")
@@ -2051,12 +2052,10 @@ def usage():
         "\tBy passing this flag, auto2cmake will use the specified version.\n"
     )
 
-########################################################################################################################
-# main
-########################################################################################################################
+
 def main(argv):
     global working_directory
-    global exclude_directories
+    global excluded_directories
     global quick
     global recursive
     global cmake_automoc
@@ -2091,7 +2090,7 @@ def main(argv):
         
         # Handles directory exclusion
         elif opt == "-e" or opt == "--exclude":
-            exclude_directories = arg.split(':')
+            excluded_directories = arg.split(':')
         
         # Enables Quick Mode
         elif opt == "-q" or opt == "--quick":
@@ -2120,8 +2119,7 @@ def main(argv):
 
     convert()
 
-########################################################################################################################
-#                                       Main entry point of the application                                            #
-########################################################################################################################
+
+## Main entry point of the application
 if __name__ == "__main__":
     main(sys.argv[1:])
