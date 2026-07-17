@@ -603,20 +603,19 @@ def process_argument(line):
             # we have the description, just break out from here
             break
 
-    # now see if this is on or off
-    on_off = "OFF"
+    is_enabled = "OFF"
     if "=yes" in s:
-        on_off = "ON"
+        is_enabled = "ON"
 
     arg_name = arg_name.replace("-", "_")
 
     # and add to the big options structure above
     if not (arg_name in options):
-        options[arg_name] = Option(arg_name, description, on_off, "", "", "")
+        options[arg_name] = Option(arg_name, description, is_enabled, "", "", "")
     else:
         options[arg_name].set_name(arg_name)
         options[arg_name].set_description(description)
-        options[arg_name].set_status(on_off)
+        options[arg_name].set_status(is_enabled)
 
 
 ########################################################################################################################
@@ -634,20 +633,20 @@ def processable_line(line):
 # processes the AM_CONDITIONAL lines
 ########################################################################################################################
 def process_conditional(line):
-    s = line[len("AM_CONDITIONAL("):].strip()
+    stripped_line = line[len("AM_CONDITIONAL("):].strip()
     define_name = ""
-    for c in s:
-        if c == ',':
+    for char in stripped_line:
+        if char == ',':
             break
         define_name += c
     bound_option = ""
     stage = 1  # 1 - skipping, 2 - adding
-    for c in s:
-        if (c == '"' or c == ' ' or c == '=') and stage == 2:
+    for char in stripped_line:
+        if (char == '"' or char == ' ' or char == '=') and stage == 2:
             break
         if stage == 2:
             bound_option += c
-        if c == '$':
+        if char == '$':
             stage = 2
 
     bound_option = bound_option.replace("-", "_")
@@ -661,7 +660,7 @@ def process_conditional(line):
 # this will process the defines from the configure.ac, but puts them in a separate list, with the comments
 ########################################################################################################################
 def process_a_define(line):
-    s = line[len("AC_DEFINE("):].strip()
+    stripped_line = line[len("AC_DEFINE("):].strip()
     # now parse out the define data from s
 
     define_string = ""
@@ -671,25 +670,25 @@ def process_a_define(line):
     stage = 1  # 1 - parsing  the define name, 2 parsing the define value, 3 - parsing the define description
     sqp = 0
     roup = 1
-    for c in s:
-        if c == '[':
+    for char in stripped_line:
+        if char == '[':
             sqp += 1
-        if c == ']':
+        if char == ']':
             sqp -= 1
-        if c == '(':
+        if char == '(':
             roup += 1
-        if c == ')':
+        if char == ')':
             roup -= 1
             # Did we close the parentheses for AC_DEFINE( ?
             if roup == 0:
                 break
-        if c == ',' and sqp == 0:
+        if char == ',' and sqp == 0:
             stage += 1
             if stage == 4:
                 break
-        if stage == 1 and c != ',':
+        if stage == 1 and char != ',':
             define_string += c
-        elif stage == 2 and c != ',':
+        elif stage == 2 and char != ',':
             defined_to_value += c
         elif stage == 3:
             define_description += c
@@ -697,12 +696,12 @@ def process_a_define(line):
     # and finding the variable name (option name in later stages here)
     variable_name = ""
     stage = 1 # 1 - skipping, 2 - adding
-    for c in s:
-        if c == '"' and stage == 2:
+    for char in stripped_line:
+        if char == '"' and stage == 2:
             break
         if stage == 2:
             variable_name += c
-        if c == '$':
+        if char == '$':
             stage = 2
 
     temp_defines[define_string] = {}
