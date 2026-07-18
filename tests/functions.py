@@ -72,7 +72,7 @@ def run_test(repo_url: str, project_name, packages_to_check: List[str], test_num
         
     project_path = os.path.join(cwd, project_name)
 
-    auto2cmake_py = os.path.join(repo_root, "auto2cmake.py")
+    auto2cmake_py = os.path.join(repo_root, "main.py")
 
     if not os.path.exists(project_path):
         print(f"Error: {project_path} does not exist.")
