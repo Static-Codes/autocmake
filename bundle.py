@@ -20,7 +20,7 @@ OUTPUT = 'auto2cmake.py'
 # - ^\s* - Removes optional leading whitespace. 
 # - (import|'from') - Removes import keywords
 # - ({"|".join(INTERNAL_MODULES)}) - This will skip lines containing internal modules.
-# - The \b (word boundary) ensures we don't match 'constants_test' if we only want 'constants'
+# - \b - The word boundary ensures test modules are ignored; for example: 'constants_test' when 'constants' is desired.
 IMPORT_PATTERN = re.compile(
     fr'^\s*(import|from)\s+({"|".join(INTERNAL_MODULES)})\b', 
     re.IGNORECASE
