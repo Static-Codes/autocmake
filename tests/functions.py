@@ -123,6 +123,7 @@ def run_test(repo_url: str, project_name, packages_to_check: List[str], test_num
         shutil.rmtree(build_dir)
     os.makedirs(build_dir)
 
+    # Warning are expected, but aslong as the return code is 0, the conversion operation was successful.
     res = run_command(f"cmake -S {project_path} -B {build_dir}")
     
     # Tracking the status of both the config and build phases
